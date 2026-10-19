@@ -33,10 +33,28 @@ jobs:
         uses: actions/github-script@v9
         with:
           script: |
+            const title = "🚨 Testnet Reset Detected (Evidence Stale)";
+            const body = "The scheduled smoke test failed, which usually indicates that the Stellar testnet has reset. Please follow the [Testnet Reset Runbook](https://github.com/${{ github.repository }}/blob/main/docs/runbook-testnet-reset.md) to update the deployed contract IDs and evidence hashes.";
+            const existing = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'testnet-reset',
+            });
+            const dup = existing.data.find(i => i.title === title);
+            if (dup) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: dup.number,
+                body: `Still failing as of run https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}.`,
+              });
+              return;
+            }
             github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              title: "🚨 Testnet Reset Detected (Evidence Stale)",
-              body: "The scheduled smoke test failed, which usually indicates that the Stellar testnet has reset. Please follow the [Testnet Reset Runbook](https://github.com/${{ github.repository }}/blob/main/docs/runbook-testnet-reset.md) to update the deployed contract IDs and evidence hashes.",
+              title: title,
+              body: body,
               labels: ["bug", "testnet-reset"]
             })
