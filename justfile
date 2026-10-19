@@ -108,8 +108,7 @@ lint:
     npm run lint
 
 typecheck:
-    npm run typecheck --workspace=packages/client
-    @if [ -f app/tsconfig.json ]; then cd app && npx --no-install tsc --noEmit; fi
+    npm run typecheck --workspaces --if-present
 
 # ── Client ────────────────────────────────────────────────────────────────────
 

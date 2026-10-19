@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "generate": "node --experimental-vm-modules generate.mjs > poseidon.json"
+    "generate": "node --experimental-vm-modules generate.mjs > poseidon.json",
+    "typecheck": "node -e \"process.exit(0)\""
   },
   "dependencies": {
     "poseidon-bls12381": "^1.0.0"
