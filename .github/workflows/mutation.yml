@@ -32,6 +32,23 @@ jobs:
             const issueTitle = '🚨 Mutation Testing Failed';
             const issueBody = `The scheduled mutation testing run failed. This could indicate a regression in mutation score below the required \`break\` threshold.\n\nSee run here: https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
 
+            const existing = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'automated',
+            });
+            const dup = existing.data.find(i => i.title === issueTitle);
+            if (dup) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: dup.number,
+                body: `Still failing as of run https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}.`,
+              });
+              return;
+            }
+
             await github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
