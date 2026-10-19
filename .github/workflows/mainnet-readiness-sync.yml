@@ -15,19 +15,33 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          TITLE="Mainnet readiness checklist: stale items to update"
           # Extract issues between "## 1. Cryptographic" and "## Done"
           ISSUES=$(sed -n '/^## 1\. Cryptographic/,/^## Done/p' docs/mainnet-readiness.md | grep -o '#[0-9]\+' | tr -d '#' | sort -u)
 
+          STALE=""
           for ISSUE in $ISSUES; do
             STATE=$(gh issue view "$ISSUE" --json state -q .state 2>/dev/null || echo "NOT_FOUND")
             if [ "$STATE" = "CLOSED" ]; then
-              TITLE="Stale checklist item: Issue #$ISSUE is closed"
-              EXISTING=$(gh issue list --search "in:title \"$TITLE\"" --state open --json number -q '.[0].number' 2>/dev/null)
-              
-              if [ -z "$EXISTING" ] || [ "$EXISTING" = "null" ]; then
-                gh issue create \
-                  --title "$TITLE" \
-                  --body "Issue #$ISSUE is referenced as an open item in \`docs/mainnet-readiness.md\`, but the issue is closed. Please update the checklist."
-              fi
+              STALE="$STALE $ISSUE"
             fi
           done
+
+          if [ -z "$STALE" ]; then
+            echo "No stale checklist rows."
+            exit 0
+          fi
+
+          BODY="The following issues are referenced as open items in \`docs/mainnet-readiness.md\`, but are closed. Please update the checklist (tick done or re-point at remaining work):"
+          for ISSUE in $STALE; do
+            BODY="$BODY
+          - #$ISSUE"
+          done
+
+          EXISTING=$(gh issue list --search "in:title \"$TITLE\"" --state open --json number -q '.[0].number' 2>/dev/null)
+
+          if [ -z "$EXISTING" ] || [ "$EXISTING" = "null" ]; then
+            gh issue create --title "$TITLE" --body "$BODY"
+          else
+            gh issue edit "$EXISTING" --body "$BODY"
+          fi

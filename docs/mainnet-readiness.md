@@ -5,7 +5,7 @@ Sharibo is **testnet-only, no real funds** (see the banner in `app/src/App.tsx` 
 a **checklist, not a timeline** — there are no target dates here, because any date would be
 fiction. Every item links to the issue tracking it.
 
-**How to read this:** This document should be re-read (and items checked off, or new ones added) as issues close, not left to go stale. The genuine blockers (audits and ceremony) lead the sections.
+**How to read this:** This document should be re-read (and items checked off, or new ones added) as issues close, not left to go stale. The genuine blockers (audits and ceremony) lead the sections. Stale rows are tracked in a single synced issue ("Mainnet readiness checklist: stale items to update"), not one issue per row.
 
 ## 1. Cryptographic
 
